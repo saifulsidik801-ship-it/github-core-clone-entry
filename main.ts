@@ -106,7 +106,9 @@ async function handleRequest(request: IncomingMessage, response: ServerResponse)
     const gitMatch = /^\/([^/]+)\/([^/]+)\/(info\/refs|git-upload-pack|git-receive-pack)$/.exec(path);
     if (gitMatch) {
       const owner = gitMatch[1] as string;
-      const repoName = gitMatch[2] as string;
+      // Git clients address a repo as <name>.git over smart HTTP; the store
+      // holds it under the bare name, so drop a trailing .git here.
+      const repoName = (gitMatch[2] as string).replace(/\.git$/, '');
       const tail = gitMatch[3] as string;
       const repo = owner === forge.viewerLogin ? forge.getRepo(repoName) : undefined;
       if (!repo) {
